@@ -14,6 +14,7 @@ jwt: str = 'Cxl57Cp0MCXWnF/4lNj8D4qnADuJlEZ7vkvEq3ZglAod7PIToiYFIEGk4izVCAqILfO1
 
 app = FastAPI() # create instance of the web server
 app.add_middleware(SessionMiddleware, jwt)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="../templates")
 

@@ -5,9 +5,6 @@ from fastapi.templating import Jinja2Templates
 router = APIRouter()
 templates = Jinja2Templates(directory='templates')
 
-@router.get('/')
-async def index(request: Request):
-    return templates.TemplateResponse(request, 'index.html', {})
 
 @router.get('/search/student')
 async def search_by_name(request: Request, first: str = '', last: str = ''):

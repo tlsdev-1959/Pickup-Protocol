@@ -30,7 +30,7 @@ oauth.register( # Register the OAuth Client application
 # Time Complexity: O(n) | n is the number of roles the user has assigned
 # Space Complexity: O(1)
 async def checkAccess(roles) -> bool:
-    n: int = len(list(filter(lambda r: r['id'] ==74122, roles)))
+    n: int = len(list(filter(lambda r: r['id'] == 74122, roles)))
     print(n)
     return n > 0
 # END checkAccess
@@ -60,8 +60,8 @@ async def callback(request: Request):
     
    # webToken = jwt.encode(session, os.getenv())
 
-    return {'access_token': access,
-            'web_token': session}
+  #  return {'access_token': access,
+    #         'web_token': session}
 
 
 
@@ -96,7 +96,7 @@ async def callback(request: Request):
 
     if await checkAccess(roles):
         print('[*] Successful authentication and authorization')
-        return HTMLResponse(f'<img src={url}></img>')
+        return HTMLResponse(f'<h1>Access Granted, {user['first_name']}</h1>')
     else:
         return HTMLResponse('<h1>Access Denied</h1>')
    # return filter(lambda x: x['id'] == 24392, user['roles'])

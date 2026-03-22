@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}App{% endblock %}</title>
+    <title>{% block title %}Pickup Up{% endblock %}</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,9 +11,65 @@
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+      <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+     <style>
+    body { font-family: 'DM Sans', sans-serif; }
+    h1, .serif { font-family: 'Instrument Serif', serif; }
+
+    .grain::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0.4;
+    }
+ 
+    .card-shadow {
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.08);
+    }
+ 
+    input:focus {
+      outline: none;
+      border-color: #1a1a1a;
+    }
+ 
+    .btn-primary {
+      background: #006341;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover {
+      background: #006353;
+      transform: translateY(-1px);
+    }
+    .btn-primary:active {
+      transform: translateY(0px);
+    }
+ 
+    .fade-up {
+      animation: fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .fade-up:nth-child(1) { animation-delay: 0.05s; }
+    .fade-up:nth-child(2) { animation-delay: 0.12s; }
+    .fade-up:nth-child(3) { animation-delay: 0.19s; }
+    .fade-up:nth-child(4) { animation-delay: 0.26s; }
+    .fade-up:nth-child(5) { animation-delay: 0.33s; }
+ 
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
-<body>
-    <div class=''></div>
+<body class="grain min-h-screen bg-[#f5f3ef] flex items-center justify-center px-4">
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-[#e8e2d9] blur-[100px] opacity-60"></div>
+    <div class="absolute -bottom-32 -right-32 w-[400px] h-[400px] rounded-full bg-[#ddd8cf] blur-[100px] opacity-50"></div>
+  </div>
     {% block content %}{% endblock %}
 </body>
 </html>
