@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_public.html" %}
 
 {% block title %}Pickup App - Login{% endblock %}
 
@@ -12,10 +12,11 @@
  
     <div class="card-shadow bg-white rounded-2xl px-8 py-9">
       
+      <section class="fade-up mb-7 flex justify-center items-center">
+        <img src="{{ url_for('static', path='logo.png') }}" alt="Logo" width="100" height="100">
+      </section>
+
       <div class="fade-up mb-7">
-        <div class="justify-center">
-          <img src="{{ url_for('static', path='logo.png') }}" alt="Logo" width="100" height="100">
-        </div>
         <h1 class="text-[1.65rem] leading-tight text-[#1a1a1a] mb-1">The Lexington School Pickup Application</h1>
         <p class="text-sm text-[#888] font-light">Sign in to check students in or out</p>
       </div>
