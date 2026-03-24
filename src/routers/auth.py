@@ -57,6 +57,7 @@ async def callback(request: Request):
             'preferred': appUser.preferred,
             'access': access,
             'refresh': token['refresh_token'],
+            'exp': int((datetime.now(timezone.utc) + timedelta(seconds=3600)).timestamp())
             }
             session_jwt = jwt.encode(session, os.getenv('session_secret'), algorithm='HS256')
             finalize_url = str(request.url_for('finalize')) + f"?token={session_jwt}"

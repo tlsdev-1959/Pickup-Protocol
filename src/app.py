@@ -4,9 +4,10 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 from authlib.integrations.starlette_client import OAuth
 import uvicorn
-from routers import public, private, auth
+from routers import public, private, auth, api
 import os
 
 
@@ -14,6 +15,15 @@ import os
 
 
 app = FastAPI() # create instance of the web server
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # your frontend origin
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.add_middleware(SessionMiddleware, secret_key=os.getenv('session_secret'))
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -21,6 +31,7 @@ templates = Jinja2Templates(directory="templates")
 
 app.include_router(public.router)
 app.include_router(private.router, prefix="/app")
+app.include_router(api.router, prefix='/api')
 app.include_router(auth.router, prefix="/auth")
 
 
@@ -40,5 +51,4 @@ for route in app.routes:
     print(f"PATH: {route.path!r:40} NAME: {getattr(route, 'name', None)!r}")
 
 if __name__ == "__main__":
-    # Note: Use a string "main:app" if you want to use 'reload=True'
     uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)

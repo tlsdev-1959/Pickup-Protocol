@@ -1,0 +1,57 @@
+{% extends "base_private.html" %}
+
+{% block title %}Pickup App - {{ student['name'] }}{% endblock %}
+
+{% block content %}
+
+<div class="mt-24 w-full max-w-2xl mx-auto">
+  <div class="bg-white border border-[#e4e0db] rounded-2xl shadow-sm overflow-hidden">
+
+    <!-- Header band -->
+    <div class="h-2 bg-[#006341]"></div>
+
+    <div class="p-6 flex flex-col items-center gap-4">
+
+      <!-- Avatar -->
+      <div class="w-40 h-40 rounded-full overflow-hidden ring-2 ring-white ring-offset-2 ring-offset-[#e4e0db] bg-[#f5f3ef] flex-shrink-0">
+        <img src="{{ student.photo_url }}" alt="{{ student['name']}}" class="w-full h-full object-cover">
+      </div>
+
+      <!-- Name & grade -->
+      <div class="text-center">
+        <p class="text-[#1a1a1a] text-lg font-medium leading-snug">{{ student['name'] }}</p>
+        <p class="text-[#999] text-sm font-light mt-0.5">Grade: {{ student['grade'] }} &middot; Crew: {{ student.teacher }}</p>
+      </div>
+
+      <!-- Divider -->
+      <div class="w-full border-t border-[#e4e0db]"></div>
+
+      <!-- Detail rows -->
+      <dl class="w-full grid grid-cols-2 gap-y-3 text-sm">
+        <dt class="text-[#aaa] font-light">ID</dt>
+        <dd class="text-[#1a1a1a] font-medium text-right">{{ student['id'] }}</dd>
+
+        <dt class="text-[#aaa] font-light">Homeroom</dt>
+        <dd class="text-[#1a1a1a] font-medium text-right">{{ student['homeroom'] }}</dd>
+
+        <dt class="text-[#aaa] font-light">Authorized Pickups</dt>
+        <dd class="text-[#1a1a1a] font-medium text-right">
+            {% for p in student['pickups'] %}
+                {{ p }}
+            {% endfor %}
+        </dd>
+
+  <!--   <dt class="text-[#aaa] font-light">Dismissal</dt>
+        <dd class="text-[#1a1a1a] font-medium text-right">{{ student.dismissal_type }}</dd>-->
+      </dl>
+
+      <!-- Action button -->
+      <button type="button" class="mt-2 w-full bg-[#006341] hover:bg-[#004f33] transition-colors text-white rounded-xl py-3 text-sm font-medium tracking-wide">
+        Mark Picked Up
+      </button>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

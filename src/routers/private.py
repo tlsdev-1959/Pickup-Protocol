@@ -1,26 +1,39 @@
-from fastapi import APIRouter, Request, Depends, HTTPException, Cookie
-from fastapi.templating import Jinja2Templates
-from fastapi.responses import RedirectResponse, HTMLResponse
-from jose import jwt, JWTError
-import os
+from routers import api
 
-router = APIRouter()
-templates = Jinja2Templates(directory='templates')
-
-async def get_current_user(session: str = Cookie(None)):
-    print(session)
-    if not session:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    try:
-        payload = jwt.decode(session, os.getenv('session_secret'), algorithms=["HS256"])
-        return payload
-    except JWTError:
-        raise HTTPException(status_code=401)
+router = api.APIRouter()
+templates = api.Jinja2Templates(directory='templates')
 
 
 @router.get('/', name='home')
-async def home(request: Request, user=Depends(get_current_user)):
+async def home(request: api.Request, user=api.Depends(api.get_current_user)):
         print(user)
         return templates.TemplateResponse(request, 'home.html', {'user': user, 'preferred': user['preferred']})
+
+@router.get('/student', name='student')
+async def getStudent(request: api.Request, id: int = 1, user=api.Depends(api.get_current_user)):
+    async with api.httpx.AsyncClient() as client:
+        api_response = await client.get(
+            url=str(request.url_for('get_student_by_user_id')),
+            params={'id': id},
+            cookies=request.cookies
+        )
+
+    data=api_response.json()['student']
+    pickups = api_response.json()['pickups']
+
+    print('[*] Data: ', data)
+    print('[*] Pickups: ', pickups)
+
+
+    student = {
+        'id': id,
+        'name': f"{data['first_name']} {data['last_name']}",
+        'grade': 'GRADE_HERE',
+        'teacher': data['custom_field_two'],
+        'homeroom': data['custom_field_two'],
+        'photo_url': 'https:' + data['profile_pictures']['large_filename_url'],
+        'pickups': pickups
+    }
+    return templates.TemplateResponse(request, 'student_found.html', {'student': student})
     
 
