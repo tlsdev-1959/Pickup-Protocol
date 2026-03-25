@@ -4,17 +4,19 @@ from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
 from jose import jwt, JWTError
 import os
 import httpx
+from datetime import datetime, timezone, timedelta
+from dateutil import parser
 
 router = APIRouter()
 templates = Jinja2Templates(directory='templates')
 
 async def get_current_user(session: str = Cookie(None)):
-    print(session)
+    print('[*] Encrypted Cookie: ', session)
     if not session:
         raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         payload = jwt.decode(session, os.getenv('session_secret'), algorithms=["HS256"])
-        
+        exp: datetime = datetime.fromtimestamp(payload['exp'])
         return payload
     except JWTError:
         raise HTTPException(status_code=401)
@@ -40,21 +42,27 @@ async def getMyProfilePicture(request: Request, user=Depends(get_current_user)):
 async def studentById(request: Request, id: int, user=Depends(get_current_user)):
     bb_url: str = f'https://api.sky.blackbaud.com/school/v1/users/{id}'
     bb_custom_url: str = f'https://api.sky.blackbaud.com/school/v1/users/{id}/customfields'
+    bb_schedule_url: str = f'https://api.sky.blackbaud.com/school/v1/schedules/{id}/meetings?start_date={datetime.now().date()}&end_date={datetime.now().date()}'
     bb_headers = {
         'Cache-Control': 'no-cache',
         'Bb-Api-Subscription-Key': os.getenv('bb_subscription'),
         'Authorization': user['access']
     }
+    print('[!] Schedule: ', bb_schedule_url)
     print('[*] URL: ', bb_custom_url)
     async with httpx.AsyncClient() as client:
         bb_response = await client.get(url=bb_url, headers=bb_headers)
         bb_custom_response = await client.get(url=bb_custom_url, headers=bb_headers)
-        print(bb_custom_response.json())
+        bb_schedule_response = await client.get(bb_schedule_url, headers=bb_headers)
         auth_pickups = [v['text_value'] for v in list(filter(lambda f: f['field_id'] == 3078, bb_custom_response.json()['custom_fields']))]
         lunch_visitors = [v['text_value'] for v in list(filter(lambda f: f['field_id'] == 3098, bb_custom_response.json()['custom_fields']))] 
-        print('[*] Auth pickups: ', auth_pickups)
-        print('[*] Type: ', type(bb_response.json()))
-    return JSONResponse({'student': bb_response.json(), 'pickups': auth_pickups, 'visitors': lunch_visitors})
+        at_now = [parser.parse(v['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() for v in list(bb_schedule_response.json()['value'])]
+        if len(at_now):
+            at_now = bb_schedule_response.json()['value'][-1]
+        print([parser.parse(v['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() for v in list(bb_schedule_response.json()['value'])])
+        print(at_now)
+    
+    return JSONResponse({'student': bb_response.json(), 'pickups': auth_pickups, 'visitors': lunch_visitors, 'schedule': bb_schedule_response.json()['value'], 'At now': at_now})
 
 
 

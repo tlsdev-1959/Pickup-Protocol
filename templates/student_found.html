@@ -21,6 +21,7 @@
       <div class="text-center">
         <p class="text-[#1a1a1a] text-lg font-medium leading-snug">{{ student['name'] }}</p>
         <p class="text-[#999] text-sm font-light mt-0.5">Grade: {{ student['grade'] }} &middot; Crew: {{ student.teacher }}</p>
+        <p class="text-[#999] text-sm font-light mt-0.5">Where: {{ student['where']['course_title'] }}</p>
       </div>
 
       <!-- Divider -->
@@ -38,6 +39,12 @@
         <dd class="text-[#1a1a1a] font-medium text-right">
             {% for p in student['pickups'] %}
                 {{ p }}
+            {% endfor %}
+        </dd>
+        <dt class="text-[#aaa] font-light">Lunch Visitors</dt>
+        <dd class="text-[#1a1a1a] font-medium text-right">
+            {% for v in student['visitors'] %}
+                {{ v }}
             {% endfor %}
         </dd>
 

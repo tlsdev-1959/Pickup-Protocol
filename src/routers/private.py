@@ -20,9 +20,8 @@ async def getStudent(request: api.Request, id: int = 1, user=api.Depends(api.get
 
     data=api_response.json()['student']
     pickups = api_response.json()['pickups']
-
-    print('[*] Data: ', data)
-    print('[*] Pickups: ', pickups)
+    visitors = api_response.json()['visitors']
+    at_now = api_response.json()['At now']
 
 
     student = {
@@ -32,7 +31,9 @@ async def getStudent(request: api.Request, id: int = 1, user=api.Depends(api.get
         'teacher': data['custom_field_two'],
         'homeroom': data['custom_field_two'],
         'photo_url': 'https:' + data['profile_pictures']['large_filename_url'],
-        'pickups': pickups
+        'pickups': pickups,
+        'visitors': visitors,
+        'where': at_now
     }
     return templates.TemplateResponse(request, 'student_found.html', {'student': student})
     
