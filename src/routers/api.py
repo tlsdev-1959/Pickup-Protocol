@@ -49,10 +49,12 @@ async def studentById(request: Request, id: int, user=Depends(get_current_user))
     async with httpx.AsyncClient() as client:
         bb_response = await client.get(url=bb_url, headers=bb_headers)
         bb_custom_response = await client.get(url=bb_custom_url, headers=bb_headers)
+        print(bb_custom_response.json())
         auth_pickups = [v['text_value'] for v in list(filter(lambda f: f['field_id'] == 3078, bb_custom_response.json()['custom_fields']))]
+        lunch_visitors = [v['text_value'] for v in list(filter(lambda f: f['field_id'] == 3098, bb_custom_response.json()['custom_fields']))] 
         print('[*] Auth pickups: ', auth_pickups)
         print('[*] Type: ', type(bb_response.json()))
-    return JSONResponse({'student': bb_response.json(), 'pickups': auth_pickups})
+    return JSONResponse({'student': bb_response.json(), 'pickups': auth_pickups, 'visitors': lunch_visitors})
 
 
 
