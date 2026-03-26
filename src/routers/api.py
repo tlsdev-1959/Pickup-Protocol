@@ -61,7 +61,8 @@ async def studentById(request: Request, id: int, user=Depends(get_current_user))
         auth_pickups = [v['text_value'] for v in list(filter(lambda f: f['field_id'] == 3078, bb_custom_response.json()['custom_fields']))]
         lunch_visitors = [v['text_value'] for v in list(filter(lambda f: f['field_id'] == 3098, bb_custom_response.json()['custom_fields']))] 
         #at_now = [parser.parse(v['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() and parser.parse(v['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() for v in list(bb_schedule_response.json()['value'])]
-        at_now = list(filter(lambda f: parser.parse(f['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() and parser.parse(f['end_time'], tzinfos=None).isoformat()), bb_schedule_response.json())
+        #at_now = list(filter(lambda f: parser.parse(f['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() and parser.parse(f['end_time'], tzinfos=None).isoformat(), bb_schedule_response.json()))
+        at_now = [{'course_title': 'math'}]
         if not len(at_now):
             at_now = bb_schedule_response.json()['value'][-1]
         print([parser.parse(v['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() for v in list(bb_schedule_response.json()['value'])])
