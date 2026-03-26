@@ -40,7 +40,7 @@ async def callback(request: Request):
 
         bb_headers = {
             'Cache-Control': 'no-cache',
-            'Bb-Api-Subscription-Key': 'da04e1938daa4ed28e9fd5a0e29f1cd9',
+            'Bb-Api-Subscription-Key': os.getenv('bb_subscription'),
             'Authorization': access
         }
 

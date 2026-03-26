@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Depends, HTTPException, Cookie
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
-from jose import jwt, JWTError
+from jose import jwt, JWTError, ExpiredSignatureError
 import os
 import httpx
 from datetime import datetime, timezone, timedelta
@@ -16,8 +16,12 @@ async def get_current_user(session: str = Cookie(None)):
         raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         payload = jwt.decode(session, os.getenv('session_secret'), algorithms=["HS256"])
+        print(payload)
         exp: datetime = datetime.fromtimestamp(payload['exp'])
         return payload
+    except ExpiredSignatureError:
+        print('[*] Cookie needs to be refreshed')
+        raise HTTPException(status_code=504)
     except JWTError:
         raise HTTPException(status_code=401)
 
@@ -56,8 +60,9 @@ async def studentById(request: Request, id: int, user=Depends(get_current_user))
         bb_schedule_response = await client.get(bb_schedule_url, headers=bb_headers)
         auth_pickups = [v['text_value'] for v in list(filter(lambda f: f['field_id'] == 3078, bb_custom_response.json()['custom_fields']))]
         lunch_visitors = [v['text_value'] for v in list(filter(lambda f: f['field_id'] == 3098, bb_custom_response.json()['custom_fields']))] 
-        at_now = [parser.parse(v['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() for v in list(bb_schedule_response.json()['value'])]
-        if len(at_now):
+        #at_now = [parser.parse(v['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() and parser.parse(v['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() for v in list(bb_schedule_response.json()['value'])]
+        at_now = list(filter(lambda f: parser.parse(f['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() and parser.parse(f['end_time'], tzinfos=None).isoformat()), bb_schedule_response.json())
+        if not len(at_now):
             at_now = bb_schedule_response.json()['value'][-1]
         print([parser.parse(v['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() for v in list(bb_schedule_response.json()['value'])])
         print(at_now)

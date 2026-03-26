@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi import APIRouter, Request
-from fastapi.responses import RedirectResponse, HTMLResponse
+from fastapi.responses import RedirectResponse, HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from authlib.integrations.starlette_client import OAuth
 import uvicorn
@@ -16,6 +16,7 @@ import os
 
 app = FastAPI() # create instance of the web server
 
+# Add a middleware to handle cross-orgin requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # your frontend origin
@@ -24,11 +25,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add a middleware to handle the cookies and authenticate requests
 app.add_middleware(SessionMiddleware, secret_key=os.getenv('session_secret'))
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
-templates = Jinja2Templates(directory="templates")
+# Mount the statuc and templates directories
+app.mount("/static", StaticFiles(directory="static"), name="static") 
+templates = Jinja2Templates(directory="templates") # Mount the directory of templates
 
+
+# Initialize the routes that the API of the web app can take
 app.include_router(public.router)
 app.include_router(private.router, prefix="/app")
 app.include_router(api.router, prefix='/api')
@@ -47,8 +52,10 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         status_code=exc.status_code
     )
 
-for route in app.routes:
-    print(f"PATH: {route.path!r:40} NAME: {getattr(route, 'name', None)!r}")
+
+
+#for route in app.routes:
+#    print(f"PATH: {route.path!r:40} NAME: {getattr(route, 'name', None)!r}")
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
