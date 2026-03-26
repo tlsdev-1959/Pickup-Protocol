@@ -21,7 +21,7 @@ async def getStudent(request: api.Request, id: int = 1, user=api.Depends(api.get
     data=api_response.json()['student']
     pickups = api_response.json()['pickups']
     visitors = api_response.json()['visitors']
-    at_now = api_response.json()['At now']
+    at_now = api_response.json()['At now'][0]
 
 
     student = {

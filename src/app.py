@@ -52,10 +52,5 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         status_code=exc.status_code
     )
 
-
-
-#for route in app.routes:
-#    print(f"PATH: {route.path!r:40} NAME: {getattr(route, 'name', None)!r}")
-
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("app:app", host="127.0.0.1", port=80, reload=True)

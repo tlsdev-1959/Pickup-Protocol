@@ -16,7 +16,6 @@ async def get_current_user(session: str = Cookie(None)):
         raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         payload = jwt.decode(session, os.getenv('session_secret'), algorithms=["HS256"])
-        print(payload)
         exp: datetime = datetime.fromtimestamp(payload['exp'])
         return payload
     except ExpiredSignatureError:
@@ -24,6 +23,9 @@ async def get_current_user(session: str = Cookie(None)):
         raise HTTPException(status_code=504)
     except JWTError:
         raise HTTPException(status_code=401)
+    
+async def make_bb_call(request: Request, user):
+    return
 
     
 @router.get('/me/profile/picture', name='my_picture')
@@ -58,15 +60,15 @@ async def studentById(request: Request, id: int, user=Depends(get_current_user))
         bb_response = await client.get(url=bb_url, headers=bb_headers)
         bb_custom_response = await client.get(url=bb_custom_url, headers=bb_headers)
         bb_schedule_response = await client.get(bb_schedule_url, headers=bb_headers)
+        #rint(bb_schedule_response.json())
         auth_pickups = [v['text_value'] for v in list(filter(lambda f: f['field_id'] == 3078, bb_custom_response.json()['custom_fields']))]
         lunch_visitors = [v['text_value'] for v in list(filter(lambda f: f['field_id'] == 3098, bb_custom_response.json()['custom_fields']))] 
-        #at_now = [parser.parse(v['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() and parser.parse(v['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() for v in list(bb_schedule_response.json()['value'])]
-        at_now = list(filter(lambda f: parser.parse(f['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() and parser.parse(f['end_time'], tzinfos=None).isoformat()), bb_schedule_response.json())
+        at_now = list(filter(lambda f: (parser.parse(f['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat())
+                             and (parser.parse(f['end_time'], tzinfos=None).isoformat() > datetime.now().isoformat()), bb_schedule_response.json()['value']))
+        print(at_now)
         if not len(at_now):
             at_now = bb_schedule_response.json()['value'][-1]
-        print([parser.parse(v['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat() for v in list(bb_schedule_response.json()['value'])])
-        print(at_now)
-    
+
     return JSONResponse({'student': bb_response.json(), 'pickups': auth_pickups, 'visitors': lunch_visitors, 'schedule': bb_schedule_response.json()['value'], 'At now': at_now})
 
 
