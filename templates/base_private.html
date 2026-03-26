@@ -6,14 +6,12 @@
     <title>{% block title %}Pickup Up{% endblock %}</title>
 
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/output.css">
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-      <!-- Tailwind Play CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
 
      <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 
@@ -57,7 +55,7 @@
     }
  
     .logo-mark {
-      background: #fff;
+      background: none;
     }
   </style>
 
@@ -78,7 +76,9 @@
     <!-- Logo -->
     <div class="flex items-center gap-2.5 flex-shrink-0 pl-4">
       <div class="logo-mark w-64 h-38 rounded-lg flex items-center justify-center">
-        <img src="{{ url_for('static', path='logo-nav.png') }}" alt="Logo">
+        <a href="https://www.thelexingtonschool.org">
+          <img src="{{ url_for('static', path='logo-nav.png') }}" alt="Logo">
+        </a>
       </div>
     </div>
 

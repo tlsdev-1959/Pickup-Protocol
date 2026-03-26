@@ -59,7 +59,7 @@ async def callback(request: Request):
             'refresh': token['refresh_token'],
             'exp': int((datetime.now(timezone.utc) + timedelta(seconds=session_exp)).timestamp())
             }
-            session_jwt = jwt.encode(session, os.getenv('session_secret'), algorithm='HS256')
+            session_jwt = jwt.encode(session, os.getenv('session_secret'), algorithm='HS384')
             finalize_url = str(request.url_for('finalize')) + f"?token={session_jwt}"
             return RedirectResponse(url=finalize_url, status_code=303)
         else:
