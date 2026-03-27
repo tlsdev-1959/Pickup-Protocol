@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Depends, HTTPException, Cookie
+from fastapi import APIRouter, Request, Depends, HTTPException, Cookie, Security
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
 from jose import jwt, JWTError, ExpiredSignatureError
@@ -18,7 +18,6 @@ async def get_current_user(session: str = Cookie(None)):
         raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         payload = jwt.decode(session, os.getenv('session_secret'), algorithms=["HS384"])
-        exp: datetime = datetime.fromtimestamp(payload['exp'])
         return payload
     except ExpiredSignatureError:
         print('[*] Cookie needs to be refreshed')
@@ -26,7 +25,7 @@ async def get_current_user(session: str = Cookie(None)):
     except JWTError:
         raise HTTPException(status_code=401)
     
-async def make_bb_get_call(actor: dict, bb_url: str, bb_headers: dict, num_attempts: int = 0):
+async def make_bb_get_call(actor: dict, bb_url: str, bb_headers: dict, num_attempts: int = 0, client: httpx.AsyncClient = httpx.AsyncClient()):
     try:
         async with httpx.AsyncClient() as client:
             bb_response = await client.get(url=bb_url, headers=bb_headers)
@@ -45,7 +44,7 @@ async def make_bb_get_call(actor: dict, bb_url: str, bb_headers: dict, num_attem
 
     
 @router.get('/me/profile/picture', name='my_picture')
-async def getMyProfilePicture(request: Request, user=Depends(get_current_user)):
+async def getMyProfilePicture(request: Request, user=Security(get_current_user)):
     bb_url: str = f'https://api.sky.blackbaud.com/school/v1/users/{user['user']}'
     bb_headers = {
         'Cache-Control': 'no-cache',
@@ -60,8 +59,8 @@ async def getMyProfilePicture(request: Request, user=Depends(get_current_user)):
 ## Student API ##
 
 @router.get('/student', name='get_student_by_user_id')
-async def studentById(request: Request, id: int, user=Depends(get_current_user)):
-    bb_url: str = f'https://api.sky.blackbaud.com/school/v1/users/{id}'
+async def studentById(request: Request, id: int, user=Security(get_current_user)):
+    bb_url: str = f'https://api.sky.blackbaud.com/school/v1/users/extended/{id}'
     bb_custom_url: str = f'https://api.sky.blackbaud.com/school/v1/users/{id}/customfields'
     bb_schedule_url: str = f'https://api.sky.blackbaud.com/school/v1/schedules/{id}/meetings?start_date={datetime.now().date()}&end_date={datetime.now().date()}'
     bb_headers = {
@@ -81,6 +80,8 @@ async def studentById(request: Request, id: int, user=Depends(get_current_user))
                             and (parser.parse(f['end_time'], tzinfos=None).isoformat() > datetime.now().isoformat()), bb_schedule_response.json()['value']))
         if not len(at_now):
             at_now = bb_schedule_response.json()['value'][-1]
+        else:
+            at_now = at_now[0]
     except httpx.ReadTimeout:
         raise HTTPException(status_code=503, detail="server timeout, please refresh the page and contact helpdesk for futher support")
     return JSONResponse({'student': bb_response.json(), 'pickups': auth_pickups, 'visitors': lunch_visitors, 'schedule': bb_schedule_response.json()['value'], 'At now': at_now})
@@ -90,10 +91,10 @@ async def studentById(request: Request, id: int, user=Depends(get_current_user))
 
 
 @router.get('/search/byname', name='name_search')
-async def searchByName(request: Request, user=Depends(get_current_user)):
+async def searchByName(request: Request, user=Security(get_current_user)):
     return JSONResponse({'name': 'Tanner'})
 
 
 @router.get('/grades', name='get_env_grades')
-async def getGrades(request: Request, user=Depends(get_current_user)):
+async def getGrades(request: Request, user=Security(get_current_user)):
     return

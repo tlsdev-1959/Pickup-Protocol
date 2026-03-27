@@ -11,7 +11,7 @@ from routers import public, private, auth, api
 import os
 
 
-#from routers import public, protected, auth
+
 
 
 app = FastAPI() # create instance of the web server

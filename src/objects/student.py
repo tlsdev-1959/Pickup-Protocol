@@ -5,6 +5,7 @@ from dataclasses import dataclass
 @dataclass
 class Student:
     id: int
+    carline: int
     first: str
     last: str
     grade: str
@@ -12,6 +13,7 @@ class Student:
     picutre_url: str
     pickups: dict
     visitors: dict
+    schedule: dict
     at_now: dict
 
     def printName(self):

@@ -20,8 +20,8 @@
       <!-- Name & grade -->
       <div class="text-center">
         <p class="text-[#1a1a1a] text-lg font-medium leading-snug">{{ student_obj.printName() }}</p>
-        <p class="text-[#999] text-sm font-light mt-0.5">Grade: {{ student['grade'] }} &middot; Crew: {{ student.teacher }}</p>
-        <p class="text-[#999] text-sm font-light mt-0.5">Where: {{ student['where']['course_title']}} &middot; {{ student['where']['faculty_lastname'] }}</p>
+        <p class="text-[#999] text-sm font-light mt-0.5"><strong class="text-[#1a1a1a]">Grade: </strong> {{ student['grade'] }} &middot; <strong class="text-[#1a1a1a]">Crew: </strong> {{ student.teacher }}</p>
+        <p class="text-[#999] text-sm font-light mt-0.5"><strong class="text-[#1a1a1a]">Where: </strong> {{ student['where']['course_title']}} &middot; {{ student['where']['faculty_lastname'] }}</p>
       </div>
 
       <!-- Divider -->
@@ -29,27 +29,31 @@
 
       <!-- Detail rows -->
       <dl class="w-full grid grid-cols-2 gap-y-3 text-sm">
-        <dt class="text-[#aaa] font-light">ID</dt>
-        <dd class="text-[#1a1a1a] font-medium text-right">{{ student['id'] }}</dd>
+        <dt class="text-[#aaa] font-light">Carline</dt>
+        <dd class="text-[#1a1a1a] font-medium text-left">{{ student_obj.carline }}</dd>
 
         <dt class="text-[#aaa] font-light">Homeroom</dt>
-        <dd class="text-[#1a1a1a] font-medium text-right">{{ student['homeroom'] }}</dd>
+        <dd class="text-[#1a1a1a] font-medium text-left">{{ student['homeroom'] }}</dd>
 
         <dt class="text-[#aaa] font-light">Authorized Pickups</dt>
-        <dd class="text-[#1a1a1a] font-medium text-right">
+        <dd class="text-[#1a1a1a] font-medium text-left">
+          <ul>
             {% for p in student['pickups'] %}
-                {{ p }}
+               <li> {{ p }} </li>
             {% endfor %}
+          </ul>
         </dd>
         
 
 
 
         <dt class="text-[#aaa] font-light">Lunch Visitors</dt>
-        <dd class="text-[#1a1a1a] font-medium text-right">
+        <dd class="text-[#1a1a1a] font-medium text-left">
+          <ul>
             {% for v in student['visitors'] %}
-                {{ v }}
+              <li>  {{ v }} </li>
             {% endfor %}
+          </ul>
         </dd>
 
   <!--   <dt class="text-[#aaa] font-light">Dismissal</dt>
