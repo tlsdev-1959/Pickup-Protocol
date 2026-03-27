@@ -1,4 +1,8 @@
 from routers import api
+import json
+
+from objects.student import Student
+
 
 router = api.APIRouter()
 templates = api.Jinja2Templates(directory='templates')
@@ -10,19 +14,27 @@ async def home(request: api.Request, user=api.Depends(api.get_current_user)):
         return templates.TemplateResponse(request, 'home.html', {'user': user, 'preferred': user['preferred']})
 
 @router.get('/student', name='student')
-async def getStudent(request: api.Request, id: int = 1, user=api.Depends(api.get_current_user)):
-    async with api.httpx.AsyncClient() as client:
-        api_response = await client.get(
-            url=str(request.url_for('get_student_by_user_id')),
-            params={'id': id},
-            cookies=request.cookies
-        )
+async def getStudent(request: api.Request, id: int, user=api.Depends(api.get_current_user)):
+    
+    #async with api.httpx.AsyncClient() as client:
+    #    api_response = await client.get(
+    #        url=str(request.url_for('get_student_by_user_id')),
+    #        params={'id': id},
+    #        cookies=request.cookies
+    #    )
+    raw_response = await api.studentById(request, id, user)
+    api_response = json.loads(raw_response.body)
+    
+    data=api_response['student']
+    pickups = api_response['pickups']
+    visitors = api_response['visitors']
+    at_now = api_response['At now']
 
-    data=api_response.json()['student']
-    pickups = api_response.json()['pickups']
-    visitors = api_response.json()['visitors']
-    at_now = api_response.json()['At now']
 
+    student_obj = Student(id=data['id'], first=data['first_name'], last=data['last_name'], 
+                      grade='GRADE_HERE', crew=data['custom_field_two'], 
+                      picutre_url='https:'+data['profile_pictures']['large_filename_url'],
+                      pickups=pickups, visitors=visitors, at_now=at_now)
 
     student = {
         'id': id,
@@ -35,6 +47,6 @@ async def getStudent(request: api.Request, id: int = 1, user=api.Depends(api.get
         'visitors': visitors,
         'where': at_now
     }
-    return templates.TemplateResponse(request, 'student_found.html', {'student': student})
+    return templates.TemplateResponse(request, 'student_found.html', {'student': student, 'student_obj': student_obj})
     
 

@@ -72,10 +72,10 @@ async def callback(request: Request):
 
 @router.get('/finalize', name='finalize')
 async def finalize(request: Request, token: str):
-    print("FINALIZE HIT, token:", token)
+    #print("FINALIZE HIT, token:", token)
     redirect = RedirectResponse(url=str(request.url_for('home')), status_code=303)
     redirect.set_cookie(key="session", value=token, httponly=True, path="/")
-    print("FINALIZE HEADERS:", dict(redirect.headers))
+    #print("FINALIZE HEADERS:", dict(redirect.headers))
     return redirect
 
 @router.get("/logout", name="logout")
@@ -84,3 +84,23 @@ async def logout(request: Request):
     response.delete_cookie(key="session", httponly=True, path="/")
     print('[*] Logout Request: ', request.cookies)
     return response
+
+@router.get('refresh/bb', name='refresh_bb_access')
+async def refresh_bb(refresh_token: str):
+    async with httpx.AsyncClient as client:
+        refresh_response = await client.post(
+            'https://oauth2.sky.blackbaud.com/token',
+            data={
+                'grant_type': 'refresh_token',
+                'refresh_token': refresh_token,
+                'client_id': os.getenv('bb_client_id'),
+                'client_secret': os.getenv('bb_client_secret'),
+            }
+        )
+    
+    refresh_response.raise_for_status()
+    token = refresh_response.json()
+    return {
+        'access': token['token_type'] + ' ' + token['access_token'],
+        'refresh': token['refresh_response']
+    }
