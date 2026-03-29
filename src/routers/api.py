@@ -9,6 +9,7 @@ from datetime import datetime, timezone, timedelta
 from dateutil import parser
 from routers import auth
 from objects.student import Student
+import pandas as pd
 
 router = APIRouter()
 templates = Jinja2Templates(directory='templates')
@@ -105,8 +106,20 @@ async def studentById(request: Request, id: int, user=Security(get_current_user)
     return JSONResponse({'student': bb_response.json(), 'pickups': auth_pickups, 'visitors': lunch_visitors, 'schedule': bb_schedule_response.json()['value'], 'At now': at_now})
 
 
-
-
+@router.get('/students', name='get_students')
+async def getStudents(user=Security(get_current_user)):
+    buffer: list = []
+    student_role_id = 24395
+    list_id = 173008
+    page_limit = 1000
+    i: int = 0
+    while len(buffer) >= (i * page_limit):
+        i += 1
+        temp = (await make_bb_sys_get_call(user, f'https://api.sky.blackbaud.com/school/v1/lists/advanced/{list_id}?page={i}&page_size={page_limit}')).json()['results']['rows']
+        buffer.extend(temp)
+    
+    print(buffer)
+    return {'result': buffer}
 
 @router.get('/search/byname', name='name_search')
 async def searchByName(request: Request, user=Security(get_current_user)):

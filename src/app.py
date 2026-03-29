@@ -9,7 +9,7 @@ from authlib.integrations.starlette_client import OAuth
 import uvicorn
 from routers import public, private, auth, api
 import os
-
+import pandas as pd
 
 
 
@@ -51,6 +51,14 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         },
         status_code=exc.status_code
     )
+
+# Register startup event
+@app.on_event("startup")
+async def startup_event():
+    print('[*] This will be the prompt to authorize the service')
+    print('[*] System will gather the needed resources for faster searching')
+
+
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="127.0.0.1", port=80, reload=True)
