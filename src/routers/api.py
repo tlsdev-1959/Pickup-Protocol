@@ -4,6 +4,7 @@ from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
 from jose import jwt, JWTError, ExpiredSignatureError
 import os
 import httpx
+import re
 from datetime import datetime, timezone, timedelta
 from dateutil import parser
 from routers import auth
@@ -118,11 +119,20 @@ async def getGrades(request: Request, user=Security(get_current_user)):
 
 
 @router.get('/section/teacher', name='get_section_teacher')
-async def getTeacherBySection(request: Request, id: int, user=Security(get_current_user)):
+async def getTeacherExtensionBySection(request: Request, id: int, user=Security(get_current_user)):
     date = '2026-03-30'
     bb_section_response = await make_bb_sys_get_call(user, f'https://api.sky.blackbaud.com/school/v1/schedules/meetings?start_date={date}&end_date={date}&section_ids={id}')
-    return list(filter(lambda f: f['head'], bb_section_response.json()['value'][0]['teachers']))[0]['id']
+    teacher_id: int = list(filter(lambda f: f['head'], bb_section_response.json()['value'][0]['teachers']))[0]['id']
+    teacher_ext = await getUserWorkExtension(request, teacher_id, user)
+    return teacher_ext
 
 
+@router.get('/user/phones/work/extension', name='get_user_work_phone')
+async def getUserWorkExtension(request: Request, id: int, user=Security(get_current_user)):
+    bb_response = await make_bb_sys_get_call(user, f'https://api.sky.blackbaud.com/school/v1/users/{id}/phones')
 
-@
+    phone = list(filter(lambda f: f['links'][0]['id'] == int(os.getenv('work_phone_id')), bb_response.json()['value']))[0]
+    
+    ext: int = re.sub(r'ext. ', '', re.search(r'ext. [0-9]*', phone['number']).group())
+    
+    return ext
