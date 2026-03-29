@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, Depends, HTTPException, Cookie, Security
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
+import json
 from jose import jwt, JWTError, ExpiredSignatureError
 import os
 import httpx
@@ -10,6 +11,7 @@ from dateutil import parser
 from routers import auth
 from objects.student import Student
 import pandas as pd
+import numpy as np
 
 router = APIRouter()
 templates = Jinja2Templates(directory='templates')
@@ -110,7 +112,7 @@ async def studentById(request: Request, id: int, user=Security(get_current_user)
 async def getStudents(user=Security(get_current_user)):
     buffer: list = []
     student_role_id = 24395
-    list_id = 173008
+    list_id = 173010
     page_limit = 1000
     i: int = 0
     while len(buffer) >= (i * page_limit):
@@ -118,8 +120,18 @@ async def getStudents(user=Security(get_current_user)):
         temp = (await make_bb_sys_get_call(user, f'https://api.sky.blackbaud.com/school/v1/lists/advanced/{list_id}?page={i}&page_size={page_limit}')).json()['results']['rows']
         buffer.extend(temp)
     
-    print(buffer)
-    return {'result': buffer}
+    buffer = [val['columns'] for val in buffer]
+    out :np.array = np.array([], dtype=dict)
+    for val in buffer:
+        new_val = dict()
+        for v in val:
+            new_val[v['name']] = v['value']
+        out = np.append(out, new_val)
+
+    print(out)
+    df = pd.DataFrame(out)
+    return JSONResponse(json.loads(json.dumps(list(out))))
+
 
 @router.get('/search/byname', name='name_search')
 async def searchByName(request: Request, user=Security(get_current_user)):
