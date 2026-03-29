@@ -42,7 +42,24 @@ async def make_bb_get_call(actor: dict, bb_url: str, bb_headers: dict, num_attem
     #    actor['refresh'] = refreshed['refresh']
     #    actor['exp'] = datetime.now(int((datetime.now(timezone.utc) + timedelta(seconds=auth.session_exp)).timestamp()))
 
-    
+async def make_bb_sys_get_call(actor: dict, bb_url: str, num_attempts: int = 0, client: httpx.AsyncClient = httpx.AsyncClient()):
+    try:
+        bb_headers = {
+            'Cache-Control': 'no-cache',
+            'Bb-Api-Subscription-Key': os.getenv('bb_subscription'),
+            'Authorization': actor['access']
+        }
+        async with httpx.AsyncClient() as client:
+            bb_response = await client.get(url=bb_url, headers=bb_headers)
+        print(bb_response)
+        return bb_response
+    except httpx.ReadTimeout:
+        if num_attempts > 3:
+            raise HTTPException(status_code=503)
+        else:
+            return make_bb_sys_get_call(actor, bb_url, bb_headers, num_attempts + 1)
+
+
 @router.get('/me/profile/picture', name='my_picture')
 async def getMyProfilePicture(request: Request, user=Security(get_current_user)):
     bb_url: str = f'https://api.sky.blackbaud.com/school/v1/users/{user['user']}'
@@ -79,7 +96,7 @@ async def studentById(request: Request, id: int, user=Security(get_current_user)
         at_now = list(filter(lambda f: (parser.parse(f['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat())
                             and (parser.parse(f['end_time'], tzinfos=None).isoformat() > datetime.now().isoformat()), bb_schedule_response.json()['value']))
         if not len(at_now):
-            at_now = bb_schedule_response.json()['value'][-1]
+            at_now = None #bb_schedule_response.json()['value'][-1]
         else:
             at_now = at_now[0]
     except httpx.ReadTimeout:
@@ -98,3 +115,14 @@ async def searchByName(request: Request, user=Security(get_current_user)):
 @router.get('/grades', name='get_env_grades')
 async def getGrades(request: Request, user=Security(get_current_user)):
     return
+
+
+@router.get('/section/teacher', name='get_section_teacher')
+async def getTeacherBySection(request: Request, id: int, user=Security(get_current_user)):
+    date = '2026-03-30'
+    bb_section_response = await make_bb_sys_get_call(user, f'https://api.sky.blackbaud.com/school/v1/schedules/meetings?start_date={date}&end_date={date}&section_ids={id}')
+    return list(filter(lambda f: f['head'], bb_section_response.json()['value'][0]['teachers']))[0]['id']
+
+
+
+@
