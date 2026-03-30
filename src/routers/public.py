@@ -15,7 +15,7 @@ async def index(request: Request):
     except KeyError: # session not found
         return templates.TemplateResponse(request, 'index.html', {})
 
-@router.get('/login/failed/permission/error', name='access_denied')
+@router.get('/failed/permission/error', name='access_denied')
 async def showDeniedAccess(request: Request):
     return templates.TemplateResponse(request, 'access_denied.html', {})
 
