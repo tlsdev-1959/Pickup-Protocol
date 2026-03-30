@@ -25,9 +25,94 @@
       </div>
 
       <!-- Divider -->
-      <div class="w-full border-t border-[#e4e0db]"></div>
+
+
+      <!-- Tabs -->
+<div class="w-full">
+  <!-- Tab bar -->
+  <div class="flex border-b border-[#e4e0db] justify-center mb-4">
+    <button onclick="showTab('info')" id="tab-info"
+      class="tab-btn px-4 py-2 text-sm font-medium text-[#006341] border-b-2 border-[#006341] -mb-px">
+      Info
+    </button>
+    <button onclick="showTab('pickups')" id="tab-pickups"
+      class="tab-btn px-4 py-2 text-sm font-medium text-[#aaa] border-b-2 border-transparent -mb-px hover:text-[#1a1a1a]">
+      Pickups
+    </button>
+    <button onclick="showTab('visitors')" id="tab-visitors"
+      class="tab-btn px-4 py-2 text-sm font-medium text-[#aaa] border-b-2 border-transparent -mb-px hover:text-[#1a1a1a]">
+      Visitors
+    </button>
+    <button onclick="showTab('schedule')" id="tab-schedule"
+      class="tab-btn px-4 py-2 text-sm font-medium text-[#aaa] border-b-2 border-transparent -mb-px hover:text-[#1a1a1a]">
+      Schedule
+    </button>
+  </div>
+    
+  <div class="w-full border-t border-[#e4e0db]"></div>
+
+  <div class="card-window mt-auto">
+  <!-- Info tab -->
+  <div id="pane-info" class="tab-pane">
+    <dl class="w-full grid grid-cols-2 gap-y-3 text-sm">
+      <dt class="text-[#aaa] font-light">Carline</dt>
+      <dd class="text-[#1a1a1a] font-medium">{{ student_obj.carline }}</dd>
+
+      <dt class="text-[#aaa] font-light">Crew</dt>
+      <dd class="text-[#1a1a1a] font-medium">{{ student['homeroom'] }}</dd>
+
+    </dl>
+  </div>
+
+  <!-- Pickups tab -->
+  <div id="pane-pickups" class="tab-pane hidden">
+    <ul class="text-sm divide-y divide-[#e4e0db]">
+      {% for p in student['pickups'] %}
+        <li class="py-2 text-[#1a1a1a]">{{ p }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Visitors tab -->
+  <div id="pane-visitors" class="tab-pane hidden">
+    <ul class="text-sm divide-y divide-[#e4e0db]">
+      {% for v in student['visitors'] %}
+        <li class="py-2 text-[#1a1a1a]">{{ v }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Schedule tab -->
+  <div id="pane-schedule" class="tab-pane hidden">
+    <ul class="text-sm divide-y divide-[#e4e0db]">
+      {% for period in student_obj.schedule %}
+        <li class="py-2 flex justify-between">
+          <span class="text-[#aaa]">{{ period }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+  </div>
+</div>
+
+
+<script>
+  function showTab(name) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.remove('text-[#006341]', 'border-[#006341]');
+      b.classList.add('text-[#aaa]', 'border-transparent');
+    });
+    document.getElementById('pane-' + name).classList.remove('hidden');
+    const btn = document.getElementById('tab-' + name);
+    btn.classList.remove('text-[#aaa]', 'border-transparent');
+    btn.classList.add('text-[#006341]', 'border-[#006341]');
+  }
+</script>
+
 
       <!-- Detail rows -->
+       <!--
       <dl class="w-full grid grid-cols-2 gap-y-3 text-sm">
         <dt class="text-[#aaa] font-light">Carline</dt>
         <dd class="text-[#1a1a1a] font-medium text-left">{{ student_obj.carline }}</dd>
@@ -56,10 +141,8 @@
           </ul>
         </dd>
 
-  <!--   <dt class="text-[#aaa] font-light">Dismissal</dt>
-        <dd class="text-[#1a1a1a] font-medium text-right">{{ student.dismissal_type }}</dd>-->
-      </dl>
-
+  </dl>
+    -->
       <!-- Action button -->
       <button type="button" class="mt-2 w-full bg-[#006341] hover:bg-[#004f33] transition-colors text-white rounded-xl py-3 text-sm font-medium tracking-wide">
         Mark Picked Up

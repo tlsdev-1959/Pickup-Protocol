@@ -29,22 +29,20 @@ async def getStudent(request: api.Request, id: int, user=api.Depends(api.get_cur
 
 
     student_obj = Student(id=data['id'], carline=data[CARLINE_FIELD], first=data['first_name'], last=data['last_name'], 
-                      grade='GRADE_HERE', crew=data[CREW_FIELD], 
+                      grade=data['student_info']['grade_level_name'], crew=data[CREW_FIELD], 
                       picutre_url=f'https:{data['profile_photo']['photo_url']}',
                       pickups=pickups, visitors=visitors, schedule=schedule, at_now=at_now)
 
     student = {
         'id': id,
         'name': f"{data['first_name']} {data['last_name']}",
-        'grade': 'GRADE_HERE',
+        'grade': data['student_info']['grade_level_name'],
         'teacher': data['custom_field_two'],
         'homeroom': data['custom_field_two'],
         'photo_url': 'https:' + data['profile_photo']['photo_url'],
-        #'photo_url': 'https:' + data['profile_pictures']['large_filename_url'],
         'pickups': pickups,
         'visitors': visitors,
         'where': at_now
     }
     return templates.TemplateResponse(request, 'student_found.html', {'user': user, 'student': student, 'student_obj': student_obj})
     
-
