@@ -34,6 +34,7 @@ async def make_bb_get_call(actor: dict, bb_url: str, bb_headers: dict, num_attem
         async with httpx.AsyncClient() as client:
             bb_response = await client.get(url=bb_url, headers=bb_headers)
         print(bb_response)
+        #print(await auth.refresh_bb(actor['refresh']))
         return bb_response
     except httpx.ReadTimeout:
         if num_attempts > 3:
@@ -100,12 +101,16 @@ async def studentById(request: Request, id: int, user=Security(get_current_user)
         at_now = list(filter(lambda f: (parser.parse(f['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat())
                             and (parser.parse(f['end_time'], tzinfos=None).isoformat() > datetime.now().isoformat()), bb_schedule_response.json()['value']))
         if not len(at_now):
-            at_now = None #bb_schedule_response.json()['value'][-1]
+            at_now = bb_schedule_response.json()['value'][0]
         else:
             at_now = at_now[0]
     except httpx.ReadTimeout:
         raise HTTPException(status_code=503, detail="server timeout, please refresh the page and contact helpdesk for futher support")
-    return JSONResponse({'student': bb_response.json(), 'pickups': auth_pickups, 'visitors': lunch_visitors, 'schedule': bb_schedule_response.json()['value'], 'At now': at_now})
+    
+
+    ext = await getTeacherExtensionBySection(request, at_now['section_id'], user)
+    
+    return JSONResponse({'student': bb_response.json(), 'pickups': auth_pickups, 'visitors': lunch_visitors, 'schedule': bb_schedule_response.json()['value'], 'At now': at_now, 'teacher_ext': ext})
 
 
 @router.get('/students', name='get_students')

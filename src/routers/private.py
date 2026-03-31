@@ -44,5 +44,5 @@ async def getStudent(request: api.Request, id: int, user=api.Depends(api.get_cur
         'visitors': visitors,
         'where': at_now
     }
-    return templates.TemplateResponse(request, 'student_found.html', {'user': user, 'student': student, 'student_obj': student_obj})
+    return templates.TemplateResponse(request, 'student_found.html', {'user': user, 'student': student, 'student_obj': student_obj, 'ext': api_response['teacher_ext']})
     
