@@ -85,7 +85,7 @@ async def logout(request: Request):
     print('[*] Logout Request: ', request.cookies)
     return response
 
-@router.get('refresh/bb', name='refresh_bb_access')
+@router.get('/refresh/bb', name='refresh_bb_access')
 async def refresh_bb(refresh_token: str):
     async with httpx.AsyncClient as client:
         refresh_response = await client.post(
