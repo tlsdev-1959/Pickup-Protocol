@@ -12,6 +12,7 @@ from routers import auth
 from objects.student import Student
 import pandas as pd
 import numpy as np
+import asyncio
 
 router = APIRouter()
 templates = Jinja2Templates(directory='templates')
@@ -41,6 +42,21 @@ async def make_bb_get_call(actor: dict, bb_url: str, bb_headers: dict, num_attem
             raise HTTPException(status_code=503)
         else:
             return make_bb_get_call(actor, bb_url, bb_headers, num_attempts + 1)
+        
+async def make_bucket_of_bb_get_call(actor: dict, url_bucket: list, bb_headers: dict, num_attempts: int = 0, client: httpx.AsyncClient = httpx.AsyncClient()):
+    try:
+        async with httpx.AsyncClient() as client:
+            tasks = [await client.get(url=url, headers=bb_headers) for url in url_bucket]
+            return asyncio.gather
+            #bb_response = await client.get(url=bb_url, headers=bb_headers)
+        print(bb_response)
+        #print(await auth.refresh_bb(actor['refresh']))
+        return bb_response
+    except httpx.ReadTimeout:
+        if num_attempts > 3:
+            raise HTTPException(status_code=503)
+        else:
+            return make_bucket_of_bb_get_call(actor, url_bucket, bb_headers, num_attempts + 1)
     #except httpx.:
     #    refreshed = auth.refresh_bb(actor['refresh'])
     #    actor['access'] = refreshed['access']
@@ -90,6 +106,7 @@ async def studentById(request: Request, id: int, user=Security(get_current_user)
         'Bb-Api-Subscription-Key': os.getenv('bb_subscription'),
         'Authorization': user['access']
     }
+    print(await make_bucket_of_bb_get_call(user, [bb_url, bb_custom_url, bb_schedule_url], bb_headers))
     print('[!] Schedule: ', bb_schedule_url)
     print('[*] URL: ', bb_custom_url)
     try:
