@@ -106,9 +106,9 @@ async def studentById(request: Request, id: int, user=Security(get_current_user)
         'Bb-Api-Subscription-Key': os.getenv('bb_subscription'),
         'Authorization': user['access']
     }
-    print(await make_bucket_of_bb_get_call(user, [bb_url, bb_custom_url, bb_schedule_url], bb_headers))
-    print('[!] Schedule: ', bb_schedule_url)
-    print('[*] URL: ', bb_custom_url)
+    #print(await make_bucket_of_bb_get_call(user, [bb_url, bb_custom_url, bb_schedule_url], bb_headers))
+    #print('[!] Schedule: ', bb_schedule_url)
+    #print('[*] URL: ', bb_custom_url)
     try:
         bb_response = await make_bb_get_call(user, bb_url, bb_headers)
         bb_custom_response = await make_bb_get_call(user, bb_custom_url, bb_headers)
@@ -167,7 +167,7 @@ async def getGrades(request: Request, user=Security(get_current_user)):
 
 @router.get('/section/teacher', name='get_section_teacher')
 async def getTeacherExtensionBySection(request: Request, id: int, user=Security(get_current_user)):
-    date = '2026-03-30'
+    date = datetime.now().isoformat()
     bb_section_response = await make_bb_sys_get_call(user, f'https://api.sky.blackbaud.com/school/v1/schedules/meetings?start_date={date}&end_date={date}&section_ids={id}')
     teacher_id: int = list(filter(lambda f: f['head'], bb_section_response.json()['value'][0]['teachers']))[0]['id']
     teacher_ext = await getUserWorkExtension(request, teacher_id, user)
