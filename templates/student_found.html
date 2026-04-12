@@ -2,6 +2,10 @@
 
 {% block title %}Pickup App - {{ student['name'] }}{% endblock %}
 
+{% block head %}
+<link rel="preload" as="image" href="{{student.photo_url}}">
+{% endblock %}
+
 {% block content %}
 
 <div class="mt-24 w-full max-w-3xl mx-auto">
@@ -14,7 +18,7 @@
 
       <!-- Avatar -->
       <div class="w-40 h-40 rounded-full overflow-hidden ring-2 ring-white ring-offset-2 ring-offset-[#e4e0db] bg-[#f5f3ef] flex-shrink-0">
-        <img src="{{ student.photo_url }}" alt="{{ student['name']}}" class="w-full h-full object-cover">
+        <img src="{{ student.photo_url }}" alt="{{ student['name']}}" fetchpriority="high" class="w-full h-full object-cover">
       </div>
 
       <!-- Name & grade -->

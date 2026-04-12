@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Pickup Up{% endblock %}</title>
+    <title>{% block title %}Pickup App{% endblock %}</title>
 
     <!-- Tailwind CSS -->
     <link rel="stylesheet" href="/static/css/output.css">
     <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script defer src="/static/js/htmx.min.js"></script>
     <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="/static/js/alpine.js"></script>
 
 
-     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <!-- Link the font and protect it from Garret -->
+     <link href="/static/css/fonts/DMSans" rel="stylesheet"/>
 
      <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+    {% block head %}{% endblock %}
   <style>
     body { font-family: 'DM Sans', sans-serif; background: #f5f3ef; }
  
@@ -59,7 +61,7 @@
     }
   </style>
 
-  <script>
+  <script defer>
     async function loadProfilePicture() {
       const response = await fetch("{{url_for('my_picture')}}")
       const data = await response.json()
@@ -68,6 +70,7 @@
 
     loadProfilePicture()
   </script>
+
      
 </head>
 <body class="grain min-h-screen bg-[#f5f3ef] flex items-center justify-center px-4 w-full">
@@ -138,7 +141,7 @@
       <!-- Avatar -->
       <button class="avatar w-11 h-11 rounded-full overflow-hidden flex-shrink-0 cursor-pointer relative">
         <div id="avatar-skeleton" class="absolute inset-0 bg-gray-200 animate-pulse rounded-full"></div>
-        <img id="profile_url" alt="Profile" class="w-full h-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.replace('opacity-0','opacity-100'); document.getElementById('avatar-skeleton').style.display='none'">
+        <img defer id="profile_url" alt="Profile" class="w-full h-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.replace('opacity-0','opacity-100'); document.getElementById('avatar-skeleton').style.display='none'">
       </button>
     </div>
  

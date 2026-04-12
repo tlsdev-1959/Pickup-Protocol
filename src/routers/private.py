@@ -16,7 +16,7 @@ async def home(request: api.Request, user=api.Depends(api.get_current_user)):
         print(user)
         return templates.TemplateResponse(request, 'home.html', {'user': user})
 
-@router.get('/student', name='student')
+@router.get('/student/{id}', name='student')
 async def getStudent(request: api.Request, id: int, user=api.Depends(api.get_current_user)):
     raw_response = await api.studentById(request, id, user)
     api_response = json.loads(raw_response.body)

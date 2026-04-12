@@ -8,6 +8,7 @@ import numpy as np
 from datetime import datetime, timezone, timedelta
 from jose import jwt, JWTError
 from objects import user, role
+from objects.session import Session
 
 
 router = APIRouter()
@@ -19,11 +20,22 @@ oauth.register( # Register the OAuth Client application
     access_token_url="https://oauth2.sky.blackbaud.com/token",
 )
 
+session_exp = 900
+refresh_exp = 3600
 
-session_exp = 3600
-
+#sessions: set = set()
 
 ## Auth Routes
+
+
+async def generate_refresh_token(user: user.User):
+    exp = int((datetime.now(timezone.utc) + timedelta(seconds=session_exp)).timestamp())
+    encode: dict = {
+        'id': user.id,
+        'exp': exp
+    }
+    payload = jwt.encode(encode, os.getenv('session_refresh_secret'), 'HSA384')
+    return payload
 
 
 @router.get('/login', name='auth')
@@ -60,7 +72,8 @@ async def callback(request: Request):
             'exp': int((datetime.now(timezone.utc) + timedelta(seconds=session_exp)).timestamp())
             }
             session_jwt = jwt.encode(session, os.getenv('session_secret'), algorithm='HS384')
-            finalize_url = str(request.url_for('finalize')) + f"?token={session_jwt}"
+            session_refresh = generate_refresh_token(appUser)
+            finalize_url = str(request.url_for('finalize')) + f"?token={session_jwt}&refresh={session_refresh}"
             return RedirectResponse(url=finalize_url, status_code=303)
         else:
             response = RedirectResponse(url=str(request.url_for('access_denied')), status_code= 302)
@@ -71,18 +84,17 @@ async def callback(request: Request):
         raise
 
 @router.get('/finalize', name='finalize')
-async def finalize(request: Request, token: str):
-    #print("FINALIZE HIT, token:", token)
+async def finalize(request: Request, token: str, refresh: str):
     redirect = RedirectResponse(url=str(request.url_for('home')), status_code=303)
     redirect.set_cookie(key="session", value=token, httponly=True, path="/")
-    #print("FINALIZE HEADERS:", dict(redirect.headers))
+    redirect.set_cookie(key='refresh', value=refresh, httponly=True, path='/')
     return redirect
 
 @router.get("/logout", name="logout")
 async def logout(request: Request):
     response = RedirectResponse(url=str(request.url_for('index')), status_code=303)
     response.delete_cookie(key="session", httponly=True, path="/")
-    print('[*] Logout Request: ', request.cookies)
+    response.delete_cookie(key="refresh", httponly=True, path="/")
     return response
 
 @router.get('/refresh/bb', name='refresh_bb_access')
@@ -104,3 +116,7 @@ async def refresh_bb(refresh_token: str):
         'access': token['token_type'] + ' ' + token['access_token'],
         'refresh': token['refresh_response']
     }
+
+#@router.get('/refresh', name='session_refresh')
+#async def refresh(session):
+

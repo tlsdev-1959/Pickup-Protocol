@@ -6,20 +6,24 @@ from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from authlib.integrations.starlette_client import OAuth
+from starlette.middleware.base import BaseHTTPMiddleware
 import uvicorn
 from routers import public, private, auth, api
 import os
 import pandas as pd
+import logging
 
 
+Logger = logging.getLogger(__name__)
 
 
 app = FastAPI() # create instance of the web server
 
+
 # Add a middleware to handle cross-orgin requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # your frontend origin
+    allow_origins=["localhost"],  # your frontend origin
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -52,11 +56,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         status_code=exc.status_code
     )
 
-# Register startup event
-@app.on_event("startup")
-async def startup_event():
-    print('[*] This will be the prompt to authorize the service')
-    print('[*] System will gather the needed resources for faster searching')
+
 
 
 
