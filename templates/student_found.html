@@ -8,6 +8,11 @@
 
 {% block content %}
 
+  <script defer>
+
+
+  </script>
+
 <div class="mt-24 w-full max-w-3xl mx-auto">
   <div class="bg-white border border-[#e4e0db] rounded-2xl shadow-sm overflow-hidden">
 
@@ -25,7 +30,7 @@
       <div class="text-center">
         <p class="text-[#1a1a1a] text-lg font-medium leading-snug">{{ student_obj.printName() }}</p>
         <p class="text-[#999] text-sm font-light mt-0.5"><strong class="text-[#1a1a1a]">Grade: </strong> {{ student['grade'] }} &middot; <strong class="text-[#1a1a1a]">Crew: </strong> {{ student.teacher }}</p>
-        <p class="text-[#999] text-sm font-light mt-0.5"><strong class="text-[#1a1a1a]">Where: </strong> {{ student['where']['course_title']}} &middot; {{ student['where']['faculty_lastname'] }} &middot; ext. {{ ext }}</p>
+        {% if student['where'] %}<p class="text-[#999] text-sm font-light mt-0.5"><strong class="text-[#1a1a1a]">Where: </strong> {{ student['where']['course_title']}} &middot; {{ student['where']['faculty_lastname'] }} &middot; ext. {{ url_for('get_section_teacher', id=student['where']['section_id']) }}</p>{% endif %}
       </div>
 
       <!-- Divider -->

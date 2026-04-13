@@ -13,7 +13,6 @@ templates = api.Jinja2Templates(directory='templates')
 
 @router.get('/', name='home')
 async def home(request: api.Request, user=api.Depends(api.get_current_user)):
-        print(user)
         return templates.TemplateResponse(request, 'home.html', {'user': user})
 
 @router.get('/student/{id}', name='student')
@@ -42,7 +41,6 @@ async def getStudent(request: api.Request, id: int, user=api.Depends(api.get_cur
         'photo_url': 'https:' + data['profile_photo']['photo_url'],
         'pickups': pickups,
         'visitors': visitors,
-        'where': at_now
+        'where': at_now[0] if at_now else None
     }
-    return templates.TemplateResponse(request, 'student_found.html', {'user': user, 'student': student, 'student_obj': student_obj, 'ext': api_response['teacher_ext']})
-    
+    return templates.TemplateResponse(request, 'student_found.html', {'user': user, 'student': student, 'student_obj': student_obj})

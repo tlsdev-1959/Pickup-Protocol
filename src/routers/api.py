@@ -118,24 +118,24 @@ async def studentById(request: Request, id: int, user=Security(get_current_user)
                 make_bb_get_call(user, bb_url=bb_custom_url, client=client),
                 make_bb_get_call(user, bb_url=bb_schedule_url, client=client),
             )
-        auth_pickups = [v['text_value'] for v in list(filter(lambda f: f['field_id'] == 3078, bb_custom_response.json()['custom_fields']))]
-        lunch_visitors = [v['text_value'] for v in list(filter(lambda f: f['field_id'] == 3098, bb_custom_response.json()['custom_fields']))] 
+        parent_mask = np.vectorize(lambda f: f['contact'] and f['parental_access'])
+        relationships = np.array(bb_response.json()['relationships'])
+        parents = relationships[parent_mask(relationships)]
+        #parents = list(filter(lambda f: f['contact'] and f['parental_access'], np.array(bb_response.json()['relationships'], dtype=dict)))
+
+        auth_mask = np.vectorize(lambda f: f['field_id'] == 3078)
+
+        auth_pickups = np.array(bb_custom_response.json()['custom_fields'], dtype=dict)[auth_mask(bb_custom_response.json()['custom_fields'])]
+
+        visit_mask = np.vectorize(lambda f: f['field_id'] == 3098)
+
+        lunch_visitors = np.array(bb_custom_response.json()['custom_fields'], dtype=dict)[visit_mask(bb_custom_response.json()['custom_fields'])]
+
         at_now = list(filter(lambda f: (parser.parse(f['start_time'], tzinfos=None).isoformat() < datetime.now().isoformat())
                             and (parser.parse(f['end_time'], tzinfos=None).isoformat() > datetime.now().isoformat()), bb_schedule_response.json()['value']))
-        ext = ''
-        if not len(at_now):
-            at_now = ''
-        else:
-            at_now = at_now[0]
-            print(at_now)
-            ext = await getTeacherExtensionBySection(request, at_now['section_id'], user)
     except httpx.ReadTimeout:
         raise HTTPException(status_code=503, detail="server timeout, please refresh the page and contact helpdesk for futher support")
-    
-
-    
-    
-    return JSONResponse({'student': bb_response.json(), 'pickups': auth_pickups, 'visitors': lunch_visitors, 'schedule': bb_schedule_response.json()['value'], 'At now': at_now, 'teacher_ext': ext})
+    return JSONResponse({'student': bb_response.json(), 'pickups': auth_pickups.tolist(), 'visitors': lunch_visitors.tolist(), 'schedule': bb_schedule_response.json()['value'], 'At now': at_now})
 
 
 @router.get('/students', name='get_students')
@@ -174,7 +174,7 @@ async def getGrades(request: Request, user=Security(get_current_user)):
     return
 
 
-@router.get('/section/teacher', name='get_section_teacher')
+@router.get('/section/{id}/teacher', name='get_section_teacher')
 async def getTeacherExtensionBySection(id: int, user=Security(get_current_user)):
     date = datetime.now().isoformat()
     bb_headers = {

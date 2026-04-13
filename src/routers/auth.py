@@ -20,7 +20,7 @@ oauth.register( # Register the OAuth Client application
     access_token_url="https://oauth2.sky.blackbaud.com/token",
 )
 
-session_exp = 900
+session_exp = 3600
 refresh_exp = 3600
 
 #sessions: set = set()
