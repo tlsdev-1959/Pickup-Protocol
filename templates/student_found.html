@@ -9,7 +9,18 @@
 {% block content %}
 
   <script defer>
+    {% if student['where'] %}
+  fetch("{{ url_for('get_section_teacher', id=student['where']['section_id']) }}")
+    .then(r => r.json())
+    .then(data => {
+  document.getElementById('teacher-ext').textContent = data.teacher_ext || '-';
+})
 
+    .catch(() => {
+      document.getElementById('teacher-ext').textContent = '-';
+    });
+  {% endif %}
+    
 
   </script>
 
@@ -30,7 +41,7 @@
       <div class="text-center">
         <p class="text-[#1a1a1a] text-lg font-medium leading-snug">{{ student_obj.printName() }}</p>
         <p class="text-[#999] text-sm font-light mt-0.5"><strong class="text-[#1a1a1a]">Grade: </strong> {{ student['grade'] }} &middot; <strong class="text-[#1a1a1a]">Crew: </strong> {{ student.teacher }}</p>
-        {% if student['where'] %}<p class="text-[#999] text-sm font-light mt-0.5"><strong class="text-[#1a1a1a]">Where: </strong> {{ student['where']['course_title']}} &middot; {{ student['where']['faculty_lastname'] }} &middot; ext. {{ url_for('get_section_teacher', id=student['where']['section_id']) }}</p>{% endif %}
+        {% if student['where'] %}<p class="text-[#999] text-sm font-light mt-0.5"><strong class="text-[#1a1a1a]">Where: </strong> {{ student['where']['course_title']}} &middot; {{ student['where']['faculty_lastname'] }} &middot; ext. <span id="teacher-ext"></span>{% endif %}
       </div>
 
       <!-- Divider -->

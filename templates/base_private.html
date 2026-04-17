@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -61,17 +61,8 @@
     }
   </style>
 
-  <script defer>
-    async function loadProfilePicture() {
-      const response = await fetch("{{url_for('my_picture')}}")
-      const data = await response.json()
-      document.querySelectorAll('img#profile_url').forEach(img => img.src = data.url)
-    }
+  <script defer src="/static/js/profilePictureLoad.js"></script>
 
-    loadProfilePicture()
-  </script>
-
-     
 </head>
 <body class="grain min-h-screen bg-[#f5f3ef] flex items-center justify-center px-4 w-full">
    <nav class="bg-white fixed h-16 top-0 left-0 right-0 w-full z-50 flex items-center">
@@ -79,7 +70,7 @@
     <!-- Logo -->
     <div class="flex items-center gap-2.5 shrink-0 pl-4">
       <div class="logo-mark w-64 h-38 rounded-lg flex items-center justify-center">
-        <a href="https://www.thelexingtonschool.org">
+        <a href="{{ url_for('home') }}">
           <img src="{{ url_for('static', path='logo-nav.png') }}" alt="Logo">
         </a>
       </div>
@@ -94,7 +85,7 @@
            onInput() {
              clearTimeout(this.timer)
              if (!this.query.trim()) { this.suggestions = []; return }
-             this.timer = setTimeout(() => this.fetchSuggestions(), 200)
+             this.timer = setTimeout(() => this.fetchSuggestions(), 400)
            },
            async fetchSuggestions() {
              const res = await fetch(`/api/search/byname?name=${encodeURIComponent(this.query)}`)

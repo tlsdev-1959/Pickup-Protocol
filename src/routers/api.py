@@ -183,20 +183,28 @@ async def getTeacherExtensionBySection(id: int, user=Security(get_current_user))
         'Authorization': user['access']
     }
     async with httpx.AsyncClient() as client:
-        bb_section_response = await make_bb_get_call(user, f'https://api.sky.blackbaud.com/school/v1/schedules/meetings?start_date={date}&end_date={date}&section_ids={id}', bb_headers, client=client)
-        teacher_id: int = list(filter(lambda f: f['head'], bb_section_response.json()['value'][0]['teachers']))[0]['id']
-        teacher_ext = await _fetch_work_extension(teacher_id, user, client)
-    return teacher_ext
+        bb_section_response = await make_bb_get_call(user, f'https://api.sky.blackbaud.com/school/v1/schedules/meetings?start_date={date}&end_date={date}&section_ids={id}', bb_headers, 0, client=client)
+        
+        try:
+            teacher_id: int = list(filter(lambda f: f['head'], bb_section_response.json()['value'][0]['teachers']))[0]['id']
+            teacher_ext = await _fetch_work_extension(teacher_id, client, user)
+        except (IndexError, KeyError):
+            teacher_id = -1
+            teacher_ext = ''
+    return {'teacher_id': teacher_id, 'teacher_ext': teacher_ext}
 
 
-async def _fetch_work_extension(id: int, user: dict, client: httpx.AsyncClient) -> str:
-    bb_response = await make_bb_get_call(bb_url=f'https://api.sky.blackbaud.com/school/v1/users/{id}/phones', client=client)
-    phone = list(filter(lambda f: f['links'][0]['id'] == int(os.getenv('work_phone_id')), bb_response.json()['value']))[0]
-    ext: str = re.sub(r'ext. ', '', re.search(r'ext. [0-9]*', phone['number']).group())
-    return ext
+async def _fetch_work_extension(id: int, client: httpx.AsyncClient, user: dict) -> str:
+    bb_response = await make_bb_get_call(user, bb_url=f'https://api.sky.blackbaud.com/school/v1/users/{id}/phones', num_attempts=0, client=client)
+    try:
+        phone = list(filter(lambda f: f['links'][0]['id'] == int(os.getenv('work_phone_id')), bb_response.json()['value']))[0]
+        ext: str = re.sub(r'ext. ', '', re.search(r'ext. [0-9]*', phone['number']).group())
+        return ext
+    except IndexError:
+        return ''
 
 
 @router.get('/user/{id}/phones/work/extension', name='get_user_work_phone')
 async def getUserWorkExtension(id: int, user=Security(get_current_user)):
     async with httpx.AsyncClient() as client:
-        return await _fetch_work_extension(id, user, client)
+        return await _fetch_work_extension(id, client, user)
